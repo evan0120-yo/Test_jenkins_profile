@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.profile.mapper.PersonNoteMapper" >
+	<!-- save -->
+	<insert id="save" flushCache="true" parameterType="com.profile.model.PersonNote">
+		insert into person_note (person_note_id, person_id, content) values (#{personNoteId}, #{personId}, #{content})
+	</insert>
+	<!-- delete -->
+	<delete id="delete">
+		delete from person_note pn 
+		where pn.person_note_id = #{personNoteId}
+	</delete>
+</mapper>

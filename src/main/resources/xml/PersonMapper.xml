@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.profile.mapper.PersonMapper" >
+	<!-- save-->
+	<insert id="save" flushCache="true" parameterType="com.profile.model.Person">
+		insert into Person (person_id, person_name) values (#{personId}, #{personName})
+	</insert>
+	<!-- update -->
+	<update id="update" flushCache="true" parameterType="com.profile.model.Person">
+		update person p
+		set person_name = #{personName}, birth_day = #{birthDay}, birth_time = #{birthTime}
+		where p.person_id = #{personId}
+	</update>
+	<!-- delete -->
+	<delete id="delete" flushCache="true">
+		delete from person p 
+		where p.person_id = #{personId}
+	</delete>
+	
+	<!-- PersonFindAll -->
+	<resultMap id="findAllRes" type="com.profile.object.vo.PersonVO">
+		<id property="personId" column="person_id"></id>
+		<result property="personName" column="person_name"></result>
+		<result property="birthDay" column="birth_day"></result>
+		<collection property="personSigns" ofType="com.profile.object.vo.PersonSignVO">
+			<result property="personSignNumber" column="person_sign_number"></result>
+			<result property="percent" column="percent"></result>
+			<association property="sign" javaType="com.profile.object.vo.SignVO">
+				<id property="signId" column="sign_id"></id>
+				<result property="signName" column="sign_name"></result>
+			</association>
+		</collection>
+	</resultMap>
+	<select id="findAll" resultMap="findAllRes">
+		select * from person p 
+		left join person_sign ps on p.person_id = ps.person_id
+		left join sign s on ps.sign_id = s.sign_id
+		<where>
+			<if test="personName != null">p.person_name like '%${personName}%' </if>
+		</where>
+	</select> 
+	
+	<!-- PersonFindById -->
+	<resultMap id="findByIdRes" type="com.profile.object.vo.PersonVO">
+		<id property="personId" column="person_id"></id>
+		<collection property="personSigns" 
+					select="com.profile.mapper.PersonMapper.findPersonSignByPersonId" 
+					column="person_id">
+			<id property="personId" column="person_id"></id>
+		</collection>
+		<collection property="personNotes" 
+					select="com.profile.mapper.PersonMapper.findPersonNoteByPersonId" 
+					column="person_id">
+			<id property="personId" column="person_id"></id>
+		</collection>
+		<collection property="personTagCrosses" 
+					select="com.profile.mapper.PersonMapper.findPersonTagCrossByPersonId" 
+					column="person_id">
+			<id property="personId" column="person_id"></id>
+		</collection>
+	</resultMap>
+	<select id="findById" resultMap="findByIdRes">
+		select * from person p 
+		where p.person_id = #{personId}
+	</select>
+	<!-- findPersonTagCrossByPersonId -->
+	<resultMap id="findPersonTagCrossByPersonIdRes" type="com.profile.model.PersonTagCross">
+		<id property="personTagId" column="person_tag_id"></id>
+		<id property="personTagCrossId" column="person_tag_cross_id"></id>
+		<association property="personTag" 
+					select="com.profile.mapper.PersonMapper.findPersonTagByPersonTagId" 
+					column="person_tag_id">
+			<id property="personTagId" column="person_tag_id"></id>
+		</association>
+	</resultMap>
+	<select id="findPersonTagCrossByPersonId" resultMap="findPersonTagCrossByPersonIdRes">
+		select * from person_tag_cross ptc
+		where ptc.person_id = #{personId}
+	</select>
+	<!-- findPersonTagByPersonTagId -->
+	<select id="findPersonTagByPersonTagId" resultType="com.profile.model.PersonTag">
+		select * from person_tag pt
+		where pt.person_tag_id = #{personTagId}
+	</select>
+	<!-- findPersonNoteByPersonId -->
+	<select id="findPersonNoteByPersonId" resultType="com.profile.model.PersonNote">
+		select * from person_note pn 
+		where pn.person_id = #{personId}
+	</select>
+	<!-- findPersonSignByPersonId -->
+	<resultMap id="findPersonSignByPersonIdRes" type="com.profile.object.vo.PersonSignVO">
+		<id property="personSignId" column="person_sign_id"></id>
+		<result property="percent" column="percent"></result>
+		<association property="sign" 
+					select="com.profile.mapper.PersonMapper.findSignById" 
+					column="sign_id">
+			<id property="signId" column="sign_id"></id>
+		</association>
+	</resultMap>
+	<select id="findPersonSignByPersonId" resultMap="findPersonSignByPersonIdRes">
+		select * from person_sign ps
+		where ps.person_id = #{personId}
+	</select>
+	
+	<!-- findSignById -->
+	<select id="findSignById" resultType="com.profile.object.vo.SignVO">
+		select * from sign s 
+		where s.sign_id = #{signId}
+	</select>
+	
+	<!-- findPersonScopeByPersonScopeNumber -->
+	<select id="findPersonScopeByPersonScopeNumber" resultType="com.profile.object.vo.PersonScopeVO">
+		select * from person_scope ps 
+		where ps.person_scope_number = #{personScopeNumber}
+	</select>
+</mapper>
